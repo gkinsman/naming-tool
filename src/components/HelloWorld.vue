@@ -1,45 +1,84 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-typescript" target="_blank">typescript</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-  </div>
+  <v-container fluid>
+    <v-slide-y-transition mode="out-in">
+      <v-container>
+        <v-layout column justify-center>
+          <ServiceName @serviceAdded="addService"></ServiceName>
+        </v-layout>
+        <v-layout mt-4 column justify-center>
+          <v-flex>
+            <v-card>
+              <v-card-text>
+                <span class="headline">
+                  Services
+                </span>
+              </v-card-text>
+              <v-card-text v-for="(serviceGroup, key) in groupedServices" :key="key">
+                <span class="title">{{serviceGroup[0].discriminator.longName}}</span>
+                <v-flex v-for="s in serviceGroup">
+                  <span class="subheading">{{s.name}}</span>
+                </v-flex>
+              </v-card-text>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-slide-y-transition>
+  </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import Vue from "vue";
+import {Component, Lifecycle, Watch} from "av-ts";
+import ServiceName from "./ServiceName.vue";
+import { Service } from "../services/service";
+import groupBy from "lodash-es/groupBy";
+import ServiceTypes from "../services/service-types";
 
-@Component
+@Component({
+  components: {
+    ServiceName
+  }
+})
 export default class HelloWorld extends Vue {
-  @Prop() private msg!: string;
+  @Lifecycle
+    mounted() {
+      var url = new URL(window.location.href);
+      var c = url.searchParams.get("s");
+      if(!c) return;
+      console.log(c);
+      var decoded = JSON.parse(atob(c));
+      console.log(decoded);
+      this.services = <Service[]>decoded;
+  }
+
+  services: Service[] = [
+    new Service("test", "report", ServiceTypes[2]),
+    new Service("test", "report", ServiceTypes[2]),
+    new Service("test", "report", ServiceTypes[1]),
+    new Service("test", "report", ServiceTypes[10])
+  ];
+
+  addService(service: Service) {
+    this.services.push(service);
+    this.updateUrl();
+  }
+
+  get groupedServices() {
+    var r = groupBy(this.services, s => s.discriminator.shortName);
+    return r;
+  }
+
+  updateUrl() {
+    var str = JSON.stringify(this.services);
+    var base64 = btoa(str);
+    window.location.search = `s=${base64}`;
+  }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+<style scoped>
 h3 {
   margin: 40px 0 0;
 }
