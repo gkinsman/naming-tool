@@ -1,6 +1,13 @@
+import { Service } from '@/services/service';
+
 export interface ServiceType {
   shortName: string;
   longName: string;
+}
+
+export function isServiceType(thing: any): thing is ServiceType {
+  const thingAsServiceType = thing as ServiceType;
+  return thingAsServiceType.longName !== undefined && thingAsServiceType.shortName !== undefined;
 }
 
 let ServiceTypes: ServiceType[] = [

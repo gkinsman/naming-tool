@@ -35,21 +35,24 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Watch } from "av-ts";
-import ServiceTypes, { ServiceType } from "../services/service-types";
+import ServiceTypes, {
+  ServiceType,
+  isServiceType
+} from "../services/service-types";
 import { Service } from "../services/service";
 
 @Component
 export default class ServiceName extends Vue {
   area: string = "";
-  discriminator: ServiceType = null;
+  discriminator: ServiceType | null = null;
   noun: string = "";
-  selectedDiscriminator: ServiceTypes = null;
+  selectedDiscriminator: ServiceType | null = null;
 
   @Watch("selectedDiscriminator")
-  handler(newVal) {
-      if(!newVal) return;
-    if (newVal.shortName) this.discriminator = newVal;
-    else this.discriminator = {longName: newVal, shortName: newVal};
+  handler(newVal: string | ServiceType | null) {
+    if (!newVal) return;
+    if (isServiceType(newVal)) this.discriminator = newVal;
+    else this.discriminator = { longName: newVal, shortName: newVal };
   }
 
   get serviceTypes() {
@@ -61,6 +64,7 @@ export default class ServiceName extends Vue {
   }
 
   add() {
+    if (!this.discriminator) return;
     this.$emit(
       "serviceAdded",
       new Service(this.area, this.noun, this.discriminator)
