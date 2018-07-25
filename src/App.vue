@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <v-toolbar app>
-      <v-toolbar-title v-text="title"></v-toolbar-title>
+    <v-toolbar app class="title-toolbar">
+      <v-toolbar-title class="white--text" v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-content>
@@ -24,3 +24,9 @@ export default class App extends Vue {
   title: string = "Ticketer Naming Tool";
 }
 </script>
+<style scoped>
+  .title-toolbar {
+    background-color: #133158;
+  }
+</style>
+
